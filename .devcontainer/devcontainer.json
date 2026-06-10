@@ -1,0 +1,25 @@
+{
+  "name": "AtCoder C++23 GCC",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "workspaceFolder": "/workspaces/atcoder",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "C_Cpp.default.cppStandard": "c++23",
+        "C_Cpp.default.compilerPath": "/usr/local/bin/g++",
+        "C_Cpp.default.includePath": [
+          "${workspaceFolder}/include",
+          "${workspaceFolder}/third_party/ac-library",
+          "/opt/ac-library"
+        ]
+      },
+      "extensions": [
+        "ms-vscode.cpptools"
+      ]
+    }
+  }
+}
+

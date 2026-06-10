@@ -1,0 +1,17 @@
+name: atcoder-cpp23
+channels:
+  - conda-forge
+dependencies:
+  - gcc_linux-64=15.2.0
+  - gxx_linux-64=15.2.0
+  - make
+  - cmake
+  - ninja
+  - gdb
+  - python=3.12
+  - pip
+  - libboost-headers=1.88.0
+  - eigen=3.4.0
+  - gmp=6.3.0
+  - zlib
+  - bzip2

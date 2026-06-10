@@ -1,0 +1,10 @@
+{
+  "C_Cpp.default.cppStandard": "c++23",
+  "C_Cpp.default.includePath": [
+    "${workspaceFolder}/include",
+    "${workspaceFolder}/third_party/ac-library",
+    "${workspaceFolder}/.micromamba/envs/atcoder-cpp23/include"
+  ],
+  "C_Cpp.default.compilerPath": "${workspaceFolder}/.micromamba/envs/atcoder-cpp23/bin/x86_64-conda-linux-gnu-g++"
+}
+
