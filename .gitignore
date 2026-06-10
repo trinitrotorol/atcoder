@@ -1,0 +1,17 @@
+.micromamba/
+.tools/
+a.out
+*.exe
+*.o
+*.obj
+*.ilk
+*.pdb
+*.gch
+.cache/
+gcm.cache/
+third_party/ac-library/
+*.out
+std.o
+std.compat.o
+input.txt
+output.txt
