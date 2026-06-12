@@ -35,20 +35,75 @@ PowerShell から短く使う場合:
 コンテストを明示する場合:
 
 ```powershell
-.\m c CONTEST=abc461
+.\m c -C abc461
 ```
 
 入力ファイルを渡す場合:
 
 ```powershell
-.\m c INPUT=contests/abc461/sample/c.txt
+.\m c -i contests/abc461/sample/c_2.in
 ```
 
-任意のファイルを指定する場合:
+AtCoder のコンテストページから全問題のサンプルを取得する場合:
 
 ```powershell
-.\m run SRC=contests/abc461/c.cpp
+.\m -s
 ```
+
+これは AtCoder 用の micromamba 環境内の Python で動き、`https://atcoder.jp/contests/<CONTEST>/tasks` から各問題ページを見つけてサンプルを取得します。保存先は `contests/<CONTEST>/sample/` です。
+
+特定の問題だけ取得する場合:
+
+```powershell
+.\m -s c
+```
+
+URL を直接指定する場合:
+
+```powershell
+.\m -s -U https://atcoder.jp/contests/abc461/tasks/abc461_c
+```
+
+保存されるファイル:
+
+```text
+c_1.in     # 入力例1
+c_1.out
+c_2.in     # 入力例2
+c_2.out
+...
+```
+
+`.\m c` は入力指定がない場合、`c_1.in` のような最初のサンプル入力を自動で使います。
+
+全サンプルを期待出力と比較する場合:
+
+```powershell
+.\m -t c
+```
+
+パスの確認やビルドだけを行う場合:
+
+```powershell
+.\m -l c
+.\m -b c
+```
+
+よく使う短縮コマンド:
+
+```text
+.\m c                 # c.cpp をビルドして最初のサンプルで実行
+.\m -r c              # c.cpp を実行
+.\m -b c              # c.cpp をビルド
+.\m -t c              # c の全サンプルをテスト
+.\m -s                # 現在のコンテストの全サンプルを取得
+.\m -s c              # c のサンプルだけ取得
+.\m -l c              # 使われるファイルパスを確認
+.\m -u                # 初回セットアップ
+.\m -x                # ビルド成果物を削除
+```
+
+主なオプションは `-p/--problem`, `-C/--contest`, `-i/--input`, `-o/--out`, `-U/--url` です。従来通り `PROBLEM=c` や `CONTEST=abc461` のような Makefile 変数も渡せます。
 
 PowerShell から:
 
