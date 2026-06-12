@@ -11,6 +11,7 @@ a.out
 gcm.cache/
 third_party/ac-library/
 *.out
+!contests/**/sample/*.out
 std.o
 std.compat.o
 input.txt
