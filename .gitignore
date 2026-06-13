@@ -7,6 +7,8 @@ a.out
 *.ilk
 *.pdb
 *.gch
+__pycache__/
+*.pyc
 .cache/
 .atcoder-current
 .atcoder-cookie
