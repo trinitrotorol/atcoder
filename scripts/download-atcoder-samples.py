@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import os
 import re
 import sys
 import urllib.error
@@ -134,17 +135,74 @@ def infer_url_kind(url):
     return "contest"
 
 
-def fetch_html(url):
+def load_cookie_header(root, cookie_file):
+    cookie = os.environ.get("ATCODER_COOKIE", "").strip()
+    if cookie:
+        return cookie.removeprefix("Cookie:").strip()
+
+    session = os.environ.get("ATCODER_REVEL_SESSION", "").strip()
+    if session:
+        return f"REVEL_SESSION={session}"
+
+    path = Path(cookie_file)
+    if not path.is_absolute():
+        path = root / path
+    if not path.exists():
+        return None
+
+    text = path.read_text(encoding="utf-8").strip()
+    if not text:
+        return None
+
+    if "\n" in text:
+        for line in text.splitlines():
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+
+            fields = line.split("\t")
+            if len(fields) >= 7 and "atcoder.jp" in fields[0] and fields[-2] == "REVEL_SESSION":
+                return f"REVEL_SESSION={fields[-1]}"
+
+        text = " ".join(line.strip() for line in text.splitlines() if line.strip() and not line.startswith("#"))
+
+    text = text.removeprefix("Cookie:").strip()
+    if "=" in text:
+        return text
+    return f"REVEL_SESSION={text}"
+
+
+def fetch_html(url, cookie_header=None):
+    headers = {
+        "User-Agent": "atcoder-local-sample-downloader/1.0",
+        "Accept-Language": "ja,en;q=0.8",
+    }
+    if cookie_header:
+        headers["Cookie"] = cookie_header
+
     request = urllib.request.Request(
         url,
-        headers={
-            "User-Agent": "atcoder-local-sample-downloader/1.0",
-            "Accept-Language": "ja,en;q=0.8",
-        },
+        headers=headers,
     )
     with urllib.request.urlopen(request, timeout=30) as response:
         charset = response.headers.get_content_charset() or "utf-8"
         return response.read().decode(charset, errors="replace")
+
+
+def print_fetch_error(url, exc, cookie_header):
+    if isinstance(exc, urllib.error.HTTPError) and exc.code == 404:
+        print(f"failed to fetch AtCoder page: 404 Not Found: {url}", file=sys.stderr)
+        if cookie_header:
+            print("AtCoder returned 404 even with a cookie. Check contest registration and URL.", file=sys.stderr)
+        else:
+            print(
+                "If you can open the page in your browser, save your AtCoder REVEL_SESSION "
+                "to .atcoder-cookie or set ATCODER_REVEL_SESSION.",
+                file=sys.stderr,
+            )
+        return
+
+    print(f"failed to fetch AtCoder page: {exc}", file=sys.stderr)
 
 
 def write_samples(root, contest, problem, samples):
@@ -176,10 +234,10 @@ def parse_task_urls(contest, contest_url, html):
     return sorted(parser.urls, key=lambda url: infer_task_target(url)[1])
 
 
-def download_task(root, task_url, html=None):
+def download_task(root, task_url, html=None, cookie_header=None):
     contest, problem = infer_task_target(task_url)
     if html is None:
-        html = fetch_html(task_url)
+        html = fetch_html(task_url, cookie_header)
 
     sample_parser = SampleParser()
     sample_parser.feed(html)
@@ -192,20 +250,22 @@ def main():
     parser = argparse.ArgumentParser(description="Download AtCoder sample inputs and outputs.")
     parser.add_argument("url", help="AtCoder contest tasks URL or task URL")
     parser.add_argument("--root", default=".", help="repository root")
+    parser.add_argument("--cookie-file", default=".atcoder-cookie", help="AtCoder cookie file")
     args = parser.parse_args()
 
     root = Path(args.root).resolve()
     kind = infer_url_kind(args.url)
+    cookie_header = load_cookie_header(root, args.cookie_file)
 
     try:
-        html = fetch_html(args.url)
+        html = fetch_html(args.url, cookie_header)
     except urllib.error.URLError as exc:
-        print(f"failed to fetch AtCoder page: {exc}", file=sys.stderr)
+        print_fetch_error(args.url, exc, cookie_header)
         return 1
 
     if kind == "task":
         try:
-            contest, problem, written = download_task(root, args.url, html)
+            contest, problem, written = download_task(root, args.url, html, cookie_header)
         except ValueError as exc:
             print(str(exc), file=sys.stderr)
             return 1
@@ -225,8 +285,11 @@ def main():
     print(f"contest: {contest}")
     for task_url in task_urls:
         try:
-            _, problem, written = download_task(root, task_url)
-        except (urllib.error.URLError, ValueError) as exc:
+            _, problem, written = download_task(root, task_url, cookie_header=cookie_header)
+        except urllib.error.URLError as exc:
+            print_fetch_error(task_url, exc, cookie_header)
+            return 1
+        except ValueError as exc:
             print(f"failed: {task_url}: {exc}", file=sys.stderr)
             return 1
 

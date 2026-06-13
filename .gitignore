@@ -8,6 +8,9 @@ a.out
 *.pdb
 *.gch
 .cache/
+.atcoder-current
+.atcoder-cookie
+.atcoder-debug
 gcm.cache/
 third_party/ac-library/
 *.out

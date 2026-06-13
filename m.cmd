@@ -32,6 +32,13 @@ if /I "%~1"=="-i" goto parse_input
 if /I "%~1"=="--input" goto parse_input
 if /I "%~1"=="-o" goto parse_output
 if /I "%~1"=="--out" goto parse_output
+if /I "%~1"=="--create" goto parse_create
+if /I "%~1"=="create" goto parse_create
+if /I "%~1"=="init" goto parse_create
+if /I "%~1"=="use" goto parse_use
+if /I "%~1"=="current" goto parse_current
+if /I "%~1"=="debug" goto parse_debug
+if /I "%~1"=="--debug" goto parse_debug
 if "%~1"=="-C" goto parse_contest
 if /I "%~1"=="--contest" goto parse_contest
 if "%~1"=="-U" goto parse_url
@@ -70,6 +77,51 @@ goto parse_args
 set "MAKE_ARGS=%MAKE_ARGS% sample"
 shift
 goto parse_optional_problem
+
+:parse_create
+set "MAKE_ARGS=%MAKE_ARGS% create"
+shift
+goto parse_optional_contest
+
+:parse_use
+set "MAKE_ARGS=%MAKE_ARGS% use"
+shift
+goto parse_optional_contest
+
+:parse_current
+set "MAKE_ARGS=%MAKE_ARGS% current"
+shift
+goto parse_args
+
+:parse_debug
+shift
+if "%~1"=="" (
+    set "MAKE_ARGS=%MAKE_ARGS% debug"
+    goto parse_args
+)
+if /I "%~1"=="status" (
+    set "MAKE_ARGS=%MAKE_ARGS% debug"
+    shift
+    goto parse_args
+)
+if /I "%~1"=="on" (
+    set "MAKE_ARGS=%MAKE_ARGS% debug-on"
+    shift
+    goto parse_args
+)
+if /I "%~1"=="off" (
+    set "MAKE_ARGS=%MAKE_ARGS% debug-off"
+    shift
+    goto parse_args
+)
+if /I "%~1"=="toggle" (
+    set "MAKE_ARGS=%MAKE_ARGS% debug-toggle"
+    shift
+    goto parse_args
+)
+echo unknown debug command: %~1
+echo use: .\m debug on, .\m debug off, .\m debug toggle
+exit /b 2
 
 :parse_problem
 shift
@@ -141,6 +193,16 @@ set "MAKE_ARGS=%MAKE_ARGS% URL=%~1"
 shift
 goto parse_args
 
+:parse_optional_contest
+if "%~1"=="" goto parse_args
+set "NEXT_ARG=%~1"
+if "%NEXT_ARG:~0,1%"=="-" goto parse_args
+echo(%NEXT_ARG% | findstr "=" >nul
+if not errorlevel 1 goto parse_args
+set "MAKE_ARGS=%MAKE_ARGS% CONTEST=%~1"
+shift
+goto parse_args
+
 :parse_optional_problem
 if "%~1"=="" goto parse_args
 set "NEXT_ARG=%~1"
@@ -159,6 +221,11 @@ echo   .\m -b c              Build problem c
 echo   .\m -t c              Test all samples for problem c
 echo   .\m -s                Download samples for the current contest
 echo   .\m -s c              Download samples for problem c
+echo   .\m create abc462     Create a-g.cpp for contest abc462
+echo   .\m use abc462        Set current contest
+echo   .\m current           Show current contest
+echo   .\m debug on          Enable LOCAL debug builds
+echo   .\m debug off         Disable LOCAL debug builds
 echo   .\m -l c              Show detected paths for problem c
 echo   .\m -u                Setup the WSL environment
 echo   .\m -x                Clean build outputs

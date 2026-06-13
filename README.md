@@ -44,6 +44,38 @@ PowerShell から短く使う場合:
 .\m c -i contests/abc461/sample/c_2.in
 ```
 
+新しいコンテストのファイルを作る場合:
+
+```powershell
+.\m create abc462
+```
+
+これは `contests/abc462/a.cpp` から `g.cpp` までを作ります。既存ファイルは上書きしません。`.\m init abc462` とも書けます。新規 `.cpp` には `import std;`、`debug(x)` マクロ、空の `main()` が入ります。
+
+現在使うコンテストを切り替える場合:
+
+```powershell
+.\m use abc462
+```
+
+以後、`.\m c` は `contests/abc462/c.cpp` を使います。現在の指定は `.\m current` で確認できます。
+
+ローカル用デバッグ出力を有効にする場合:
+
+```powershell
+.\m debug on
+```
+
+debug on の間はコンパイル時に `-DLOCAL` が付き、PowerShell のプロンプトにも `[DEBUG]` が表示されます。無効にする場合は `.\m debug off` です。
+
+PowerShell のプロンプトに現在のコンテストを色付きで出す場合:
+
+```powershell
+.\scripts\install-atcoder-prompt.ps1
+```
+
+このリポジトリ配下では `PS C:\workspace\atcoder [abc462]>` のように表示されます。反映されない場合は新しいターミナルを開くか、`. $PROFILE` を実行してください。
+
 AtCoder のコンテストページから全問題のサンプルを取得する場合:
 
 ```powershell
@@ -51,6 +83,12 @@ AtCoder のコンテストページから全問題のサンプルを取得する
 ```
 
 これは AtCoder 用の micromamba 環境内の Python で動き、`https://atcoder.jp/contests/<CONTEST>/tasks` から各問題ページを見つけてサンプルを取得します。保存先は `contests/<CONTEST>/sample/` です。
+
+コンテスト中など、ログインしていないと問題ページが404になる場合は、AtCoderの `REVEL_SESSION` を `.atcoder-cookie` に保存してください。このファイルはGit管理外です。
+
+```text
+REVEL_SESSION=your_session_value
+```
 
 特定の問題だけ取得する場合:
 
@@ -98,6 +136,11 @@ c_2.out
 .\m -t c              # c の全サンプルをテスト
 .\m -s                # 現在のコンテストの全サンプルを取得
 .\m -s c              # c のサンプルだけ取得
+.\m create abc462     # abc462 の a.cpp から g.cpp を作成
+.\m use abc462        # 現在使うコンテストをabc462に変更
+.\m current           # 現在使うコンテストを表示
+.\m debug on          # LOCALデバッグビルドを有効化
+.\m debug off         # LOCALデバッグビルドを無効化
 .\m -l c              # 使われるファイルパスを確認
 .\m -u                # 初回セットアップ
 .\m -x                # ビルド成果物を削除
